@@ -1,18 +1,21 @@
 services:
   web:
     build: .
+    image: antonasmirko/build-django-library
   web_migrate:
     extends:
       service: web
     depends_on:
       - web
     command: python manage.py migrate
+    image: antonasmirko/migrate-django-library
   web_run:
     extends:
       service: web
     depends_on:
       - web_migrate
     command: python manage.py runserver 0.0.0.0:8000
+    image: antonasmirko/run-django-library
   web_gunicorn:
     extends:
       service: web
@@ -25,8 +28,8 @@ services:
     volumes:
       - admin:/code/staticfiles/admin
       - static:/code/staticfiles
-
     command: gunicorn --bind 0.0.0.0:8000 locallibrary.wsgi --workers=4
+    image: antonasmirko/connect-to-gunicorn-django-library
   nginx:
     depends_on:
       - web_gunicorn
@@ -39,6 +42,7 @@ services:
       - "80:80"
     networks:
       - network-one
+    image: antonasmirko/nginx-for-django-libry
 networks:
   network-one:
     name: network-one
