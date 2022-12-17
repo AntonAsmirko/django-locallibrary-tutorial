@@ -1,0 +1,24 @@
+name: push to dockerhub
+
+on:
+  push:
+   branches: [ main ]
+  pull_request:
+    branches: [ main ]
+      
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build & Push Image
+      run: |
+        echo "${{ secrets.DOCKERPW }}" | docker login -u "antonasmirko" --password-stdin
+        docker-compose build
+        docker-compose push web
+        docker-compose push web_migrate
+        docker-compose push web_run
+        docker-compose push web_gunicorn
+        docker-compose push nginx
