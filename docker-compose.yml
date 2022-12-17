@@ -1,0 +1,42 @@
+services:
+  web:
+    build: .
+    expose:
+      - "8000"
+    networks:
+      - network-one
+  web_migrate:
+    extends:
+      service: web
+    command: python manage.py migrate
+  web_run:
+    extends:
+      service: web
+    command: python manage.py runserver 0.0.0.0:8000
+  web_gunicorn:
+    extends:
+      service: web
+    command: gunicorn --bind 0.0.0.0:8000 locallibrary.wsgi --workers=4
+    depends_on:
+      - web_run
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    networks:
+      - network-one
+  nginx:
+    build: nginx
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - web_gunicorn
+    networks:
+      - network-one
+    links:
+      - web_gunicorn
+
+networks:
+  network-one:
+    name: network-one
